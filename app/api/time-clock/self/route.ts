@@ -40,9 +40,13 @@ export async function POST(req: Request) {
 
   const db = createAdminClient();
 
-  // Is this employee allowed to clock from anywhere?
-  const { data: prof } = await db.from('profiles').select('remote_clock').eq('id', user.id).maybeSingle();
-  const remote = !!(prof as { remote_clock?: boolean } | null)?.remote_clock;
+  // Is this employee active, and allowed to clock from anywhere?
+  const { data: prof } = await db.from('profiles').select('*').eq('id', user.id).maybeSingle();
+  const p = prof as { remote_clock?: boolean; active?: boolean } | null;
+  if (p && p.active === false) {
+    return NextResponse.json({ ok: false, error: 'Your login is inactive. Talk to your supervisor.' }, { status: 403 });
+  }
+  const remote = !!p?.remote_clock;
 
   // Find the nearest active site within its radius (if we have coordinates).
   let matchedSite: Site | null = null;

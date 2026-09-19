@@ -34,6 +34,9 @@ alter table public.profiles add constraint profiles_role_check
   check (role in ('admin', 'master_admin', 'employee'));
 alter table public.profiles alter column role set default 'employee';
 alter table public.profiles add column if not exists must_change_password boolean not null default true;
+-- Inactive people keep their history but can't sign in or clock in, and are
+-- hidden from the Time clock board. Flip back to true to reactivate.
+alter table public.profiles add column if not exists active boolean not null default true;
 
 -- Auto-create a profile row whenever someone is added in Supabase Auth.
 -- New logins are always plain employees; an admin promotes them if needed.

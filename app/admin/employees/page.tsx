@@ -12,6 +12,7 @@ type Person = {
   email: string;
   role: 'employee' | 'admin' | 'master_admin';
   remote_clock: boolean;
+  active?: boolean | null;
   created_at: string;
 };
 
@@ -33,7 +34,7 @@ export default function EmployeesPage() {
     setMeId(user?.id ?? null);
     const { data } = await supabase
       .from('profiles')
-      .select('id, full_name, email, role, remote_clock, created_at')
+      .select('*')
       .order('role')
       .order('full_name');
     setPeople((data as Person[]) || []);
@@ -74,6 +75,16 @@ export default function EmployeesPage() {
   async function toggleRemote(p: Person, remote: boolean) {
     setPeople((prev) => prev.map((x) => (x.id === p.id ? { ...x, remote_clock: remote } : x)));
     await supabase.from('profiles').update({ remote_clock: remote }).eq('id', p.id);
+  }
+
+  async function toggleActive(p: Person, active: boolean) {
+    if (p.id === meId && !active) { alert("You can't deactivate your own login."); return; }
+    setPeople((prev) => prev.map((x) => (x.id === p.id ? { ...x, active } : x)));
+    const { error } = await supabase.from('profiles').update({ active }).eq('id', p.id);
+    if (error) {
+      alert('Could not change status: ' + error.message + (/active/.test(error.message) ? '\n\nRun sql/2026-09-19-active-flag.sql in Supabase to enable this.' : ''));
+      await load();
+    }
   }
 
   const [removing, setRemoving] = useState<string | null>(null);
@@ -137,8 +148,17 @@ export default function EmployeesPage() {
         {/* Phone: one card per person. */}
         <div className="sm:hidden space-y-2">
           {people.map((p) => (
-            <div key={p.id} className="bg-white border border-gray-200 rounded-lg px-3 py-2.5">
-              <div className="font-medium text-sm">{p.full_name || <span className="text-gray-400">No name</span>}</div>
+            <div key={p.id} className={`bg-white border border-gray-200 rounded-lg px-3 py-2.5 ${p.active === false ? 'opacity-60' : ''}`}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-medium text-sm min-w-0">
+                  {p.full_name || <span className="text-gray-400">No name</span>}
+                  {p.active === false && <span className="ml-2 text-[10px] uppercase tracking-wide bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">inactive</span>}
+                </div>
+                <label className="text-xs text-gray-600 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                  <input type="checkbox" checked={p.active !== false} disabled={p.id === meId} onChange={(e) => toggleActive(p, e.target.checked)} />
+                  active
+                </label>
+              </div>
               <div className="text-xs text-gray-500 break-all">{p.email}</div>
               <div className="mt-2 flex items-center justify-between gap-3">
                 {p.role === 'master_admin' ? (
@@ -174,13 +194,17 @@ export default function EmployeesPage() {
                 <th className="text-left px-3 py-2">Email</th>
                 <th className="text-left px-3 py-2">Role</th>
                 <th className="text-left px-3 py-2" title="Skip the geofence — may clock in from anywhere">Remote</th>
+                <th className="text-left px-3 py-2" title="Inactive people can't sign in or clock in and are hidden from the Time clock board">Active</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
             <tbody>
               {people.map((p) => (
-                <tr key={p.id} className="border-t border-gray-100">
-                  <td className="px-3 py-2 font-medium">{p.full_name || <span className="text-gray-400">—</span>}</td>
+                <tr key={p.id} className={`border-t border-gray-100 ${p.active === false ? 'opacity-60' : ''}`}>
+                  <td className="px-3 py-2 font-medium">
+                    {p.full_name || <span className="text-gray-400">—</span>}
+                    {p.active === false && <span className="ml-2 text-[10px] uppercase tracking-wide bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">inactive</span>}
+                  </td>
                   <td className="px-3 py-2 text-gray-600 break-all">{p.email}</td>
                   <td className="px-3 py-2">
                     {p.role === 'master_admin' ? (
@@ -196,6 +220,9 @@ export default function EmployeesPage() {
                   <td className="px-3 py-2">
                     <input type="checkbox" checked={!!p.remote_clock} onChange={(e) => toggleRemote(p, e.target.checked)} />
                   </td>
+                  <td className="px-3 py-2">
+                    <input type="checkbox" checked={p.active !== false} disabled={p.id === meId} onChange={(e) => toggleActive(p, e.target.checked)} />
+                  </td>
                   <td className="px-3 py-2 text-right">
                     {p.id !== meId && (
                       <button onClick={() => removeUser(p)} disabled={removing === p.id}
@@ -207,7 +234,7 @@ export default function EmployeesPage() {
                 </tr>
               ))}
               {people.length === 0 && (
-                <tr><td colSpan={5} className="px-3 py-6 text-center text-xs text-gray-400">No logins yet.</td></tr>
+                <tr><td colSpan={6} className="px-3 py-6 text-center text-xs text-gray-400">No logins yet.</td></tr>
               )}
             </tbody>
           </table>
@@ -215,6 +242,7 @@ export default function EmployeesPage() {
         </>
       )}
       <p className="text-[11px] text-gray-400 mt-3">
+        Untick <span className="font-medium">active</span> for someone who&apos;s away or has left: they can&apos;t sign in or clock in, they&apos;re hidden from the Time clock board, and their history is kept. Tick it again to bring them back.
         Remove deletes the login and all of that person&apos;s hours history. Export the week to CSV first if you need a record.
         To reset someone&apos;s password, have them use &ldquo;Forgot your password?&rdquo; on the sign-in page.
       </p>

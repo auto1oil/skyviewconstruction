@@ -30,7 +30,9 @@ Supabase (Postgres + Auth + row-level security) · Leaflet/OpenStreetMap maps.
   set the radius in meters; activate/deactivate sites.
 - Export the week to CSV for payroll.
 - Employees page (`/admin/employees`): add logins (a temporary password is
-  shown once), change roles, toggle remote.
+  shown once), change roles, toggle remote, mark someone inactive (can't
+  sign in or clock in, hidden from the board, history kept), or remove a
+  login entirely.
 
 **Business rules**
 - Pay week runs Sunday → Saturday.

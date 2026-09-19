@@ -32,6 +32,7 @@ type Person = {
   email: string;
   role: 'employee' | 'admin' | 'master_admin';
   remote_clock?: boolean | null;
+  active?: boolean | null;
 };
 
 function weekStart(date: Date): Date {
@@ -354,12 +355,15 @@ export default function AdminHoursPage() {
   async function loadPeople() {
     const { data } = await supabase
       .from('profiles')
-      .select('id, full_name, email, role, remote_clock')
+      .select('*')
       .in('role', ['employee', 'admin', 'master_admin'])
       .order('role')
       .order('full_name');
     setPeople((data as Person[]) || []);
   }
+  // Inactive people are hidden unless they still have hours in the selected
+  // week or an open session (so nothing silently disappears from payroll).
+  const [showInactive, setShowInactive] = useState(false);
 
   async function toggleRemote(personId: string, remote: boolean) {
     setPeople((prev) => prev.map((p) => (p.id === personId ? { ...p, remote_clock: remote } : p)));
@@ -477,11 +481,15 @@ export default function AdminHoursPage() {
     if (!byPerson[e.employee_id]) byPerson[e.employee_id] = [];
     byPerson[e.employee_id].push(e);
   });
+  const inactiveCount = people.filter((p) => p.active === false).length;
+  const visiblePeople = people.filter((p) =>
+    p.active !== false || showInactive || (byPerson[p.id]?.length ?? 0) > 0 || !!openByPerson[p.id] || (openInWeek[p.id]?.length ?? 0) > 0,
+  );
 
   function exportCSV() {
     const headers = ['Employee', 'Role', 'Date', 'Day', 'Hours', 'Source', 'Notes'];
     const rows: string[][] = [];
-    people.forEach((p) => {
+    visiblePeople.forEach((p) => {
       const personEntries = byPerson[p.id] || [];
       personEntries.forEach((e) => {
         rows.push([
@@ -593,13 +601,20 @@ export default function AdminHoursPage() {
         </div>
       )}
 
+      {inactiveCount > 0 && (
+        <label className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
+          <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
+          Show inactive ({inactiveCount})
+        </label>
+      )}
+
       {loading ? (
         <p className="text-xs text-gray-500">Loading…</p>
       ) : people.length === 0 ? (
         <p className="text-xs text-gray-500 text-center py-12">No employees on file. Add them under <a href="/admin/employees" className="text-brand-700 underline">Employees</a>.</p>
       ) : (
         <div className="space-y-4">
-          {people.map((p) => {
+          {visiblePeople.map((p) => {
             const personEntries = byPerson[p.id] || [];
             const total = personEntries.reduce((sum, e) => sum + Number(e.hours), 0);
             const regular = Math.min(total, 40);
@@ -615,6 +630,7 @@ export default function AdminHoursPage() {
                   <div className="flex items-baseline gap-2">
                     <span className="font-medium text-sm">{displayName}</span>
                     <span className="text-[10px] uppercase tracking-wide text-gray-500">{roleLabel}</span>
+                    {p.active === false && <span className="text-[10px] uppercase tracking-wide bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">inactive</span>}
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
                     {personEntries.length === 0 ? (

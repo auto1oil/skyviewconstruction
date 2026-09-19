@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase-server';
 import NavBar from '@/components/NavBar';
+import InactiveNotice from '@/components/InactiveNotice';
 
 export default async function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -9,11 +10,12 @@ export default async function EmployeeLayout({ children }: { children: React.Rea
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, email')
+    .select('*')
     .eq('id', user.id)
     .single();
 
   if (!profile) redirect('/login');
+  if (profile.active === false) return <InactiveNotice email={profile.email} />;
 
   // Admins live on the Time clock board, but may still use the employee view
   // to clock themselves in — so no bounce here.
