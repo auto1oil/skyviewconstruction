@@ -76,6 +76,23 @@ export default function EmployeesPage() {
     await supabase.from('profiles').update({ remote_clock: remote }).eq('id', p.id);
   }
 
+  const [removing, setRemoving] = useState<string | null>(null);
+  async function removeUser(p: Person) {
+    const who = p.full_name || p.email;
+    if (!confirm(`Remove ${who}?\n\nThis deletes their login and ALL of their hours, clock sessions and requests. This can't be undone.`)) return;
+    setRemoving(p.id);
+    try {
+      const res = await fetch('/api/admin/users/delete', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: p.id }),
+      });
+      const j = await res.json();
+      if (!res.ok || !j.ok) alert(j.error || 'Could not remove the user.');
+      else await load();
+    } catch { alert('Network error.'); }
+    setRemoving(null);
+  }
+
   return (
     <div>
       <h1 className="text-lg font-semibold mb-4">Employees</h1>
@@ -137,6 +154,12 @@ export default function EmployeesPage() {
                   <input type="checkbox" checked={!!p.remote_clock} onChange={(e) => toggleRemote(p, e.target.checked)} />
                   remote
                 </label>
+                {p.id !== meId && (
+                  <button onClick={() => removeUser(p)} disabled={removing === p.id}
+                    className="text-xs text-red-600 hover:underline disabled:opacity-50 whitespace-nowrap">
+                    {removing === p.id ? 'Removing…' : 'Remove'}
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -151,6 +174,7 @@ export default function EmployeesPage() {
                 <th className="text-left px-3 py-2">Email</th>
                 <th className="text-left px-3 py-2">Role</th>
                 <th className="text-left px-3 py-2" title="Skip the geofence — may clock in from anywhere">Remote</th>
+                <th className="px-3 py-2"></th>
               </tr>
             </thead>
             <tbody>
@@ -172,10 +196,18 @@ export default function EmployeesPage() {
                   <td className="px-3 py-2">
                     <input type="checkbox" checked={!!p.remote_clock} onChange={(e) => toggleRemote(p, e.target.checked)} />
                   </td>
+                  <td className="px-3 py-2 text-right">
+                    {p.id !== meId && (
+                      <button onClick={() => removeUser(p)} disabled={removing === p.id}
+                        className="text-xs text-red-600 hover:underline disabled:opacity-50 whitespace-nowrap">
+                        {removing === p.id ? 'Removing…' : 'Remove'}
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
               {people.length === 0 && (
-                <tr><td colSpan={4} className="px-3 py-6 text-center text-xs text-gray-400">No logins yet.</td></tr>
+                <tr><td colSpan={5} className="px-3 py-6 text-center text-xs text-gray-400">No logins yet.</td></tr>
               )}
             </tbody>
           </table>
@@ -183,7 +215,8 @@ export default function EmployeesPage() {
         </>
       )}
       <p className="text-[11px] text-gray-400 mt-3">
-        To remove someone or reset a password, use the Supabase dashboard (Authentication → Users). Deleting a user also deletes their hours history.
+        Remove deletes the login and all of that person&apos;s hours history. Export the week to CSV first if you need a record.
+        To reset someone&apos;s password, have them use &ldquo;Forgot your password?&rdquo; on the sign-in page.
       </p>
     </div>
   );
