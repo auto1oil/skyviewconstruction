@@ -9,3 +9,14 @@ body { background: #f9fafb; color: #111827; }
    the scrolling behavior. */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* iPhone Safari zooms the whole page when a form field smaller than 16px is
+   focused. Keep fields at 16px on phones so tapping an input doesn't zoom. */
+@media (max-width: 640px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea { font-size: 16px; }
+}
+
+/* Long emails / names never force the page wider than the phone. */
+body { overflow-wrap: anywhere; }

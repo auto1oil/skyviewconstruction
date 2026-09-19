@@ -121,12 +121,13 @@ export default function MyHoursPage() {
       <SelfClock />
       <TimeAdjustmentRequest />
 
-      <div className="flex items-center justify-between mb-4 bg-white border border-gray-200 rounded-lg px-3 py-2">
-        <button onClick={() => setWeekOffset(weekOffset - 1)} className="px-3 py-1 text-sm hover:bg-gray-100 rounded">← Prev</button>
-        <span className="text-sm font-medium">
-          {fmtNice(start)} – {fmtNice(end)}{weekOffset === 0 ? ' (this week)' : ''}
+      <div className="flex items-center justify-between gap-2 mb-4 bg-white border border-gray-200 rounded-lg px-2 py-2">
+        <button onClick={() => setWeekOffset(weekOffset - 1)} className="shrink-0 px-3 py-1 text-sm hover:bg-gray-100 rounded whitespace-nowrap">← Prev</button>
+        <span className="text-sm font-medium text-center min-w-0">
+          <span className="whitespace-nowrap">{fmtNice(start)} – {fmtNice(end)}</span>
+          {weekOffset === 0 && <span className="block text-[11px] font-normal text-gray-500">this week</span>}
         </span>
-        <button onClick={() => setWeekOffset(weekOffset + 1)} className="px-3 py-1 text-sm hover:bg-gray-100 rounded">Next →</button>
+        <button onClick={() => setWeekOffset(weekOffset + 1)} className="shrink-0 px-3 py-1 text-sm hover:bg-gray-100 rounded whitespace-nowrap">Next →</button>
       </div>
 
       <div className="bg-brand-50 border border-brand-500 rounded-lg p-4 mb-4 text-center">

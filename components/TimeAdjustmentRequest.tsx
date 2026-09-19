@@ -94,13 +94,13 @@ export default function TimeAdjustmentRequest() {
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <h2 className="font-semibold text-sm">Forgot to clock in or out?</h2>
           <p className="text-xs text-gray-500">Request a correction — an admin approves it.</p>
         </div>
         <button onClick={() => setOpen((v) => !v)}
-          className="px-3 py-1.5 text-sm rounded-md bg-brand-700 text-white hover:bg-brand-900 font-medium whitespace-nowrap">
+          className="self-start sm:self-auto px-3 py-1.5 text-sm rounded-md bg-brand-700 text-white hover:bg-brand-900 font-medium whitespace-nowrap">
           {open ? 'Close' : 'Request adjustment'}
         </button>
       </div>

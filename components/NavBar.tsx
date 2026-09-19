@@ -8,6 +8,7 @@ type Role = 'admin' | 'master_admin' | 'employee';
 const ADMIN_LINKS = [
   { href: '/admin/hours', label: 'Time clock' },
   { href: '/admin/employees', label: 'Employees' },
+  { href: '/employee/hours', label: 'My hours' },
 ];
 const EMPLOYEE_LINKS = [
   { href: '/employee/hours', label: 'My hours' },
@@ -25,28 +26,42 @@ export default function NavBar({ role, email }: { role: Role; email: string }) {
     router.refresh();
   }
 
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+
   return (
     <header className="bg-brand-900 text-white">
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-4 min-w-0">
-          <Link href="/" className="font-bold whitespace-nowrap">Skyview Construction</Link>
-          <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
-            {links.map((l) => {
-              const active = pathname === l.href || pathname.startsWith(l.href + '/');
-              return (
+      <div className="max-w-5xl mx-auto px-4">
+        {/* Top row: brand, desktop tabs, account actions. */}
+        <div className="h-14 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-4 min-w-0">
+            <Link href="/" className="font-bold whitespace-nowrap truncate">
+              <span className="sm:hidden">Skyview</span>
+              <span className="hidden sm:inline">Skyview Construction</span>
+            </Link>
+            <nav className="hidden sm:flex items-center gap-1">
+              {links.map((l) => (
                 <Link key={l.href} href={l.href}
-                  className={`px-3 py-1.5 text-sm rounded-md whitespace-nowrap ${active ? 'bg-white/15 font-medium' : 'hover:bg-white/10 text-white/80'}`}>
+                  className={`px-3 py-1.5 text-sm rounded-md whitespace-nowrap ${isActive(l.href) ? 'bg-white/15 font-medium' : 'hover:bg-white/10 text-white/80'}`}>
                   {l.label}
                 </Link>
-              );
-            })}
-          </nav>
+              ))}
+            </nav>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <span className="hidden md:inline text-xs text-white/70 truncate max-w-[180px]">{email}</span>
+            <Link href="/account" className="text-xs text-white/80 hover:underline whitespace-nowrap">Password</Link>
+            <button onClick={signOut} className="text-xs px-2.5 py-1 rounded-md border border-white/30 hover:bg-white/10 whitespace-nowrap">Sign out</button>
+          </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="hidden sm:inline text-xs text-white/70 truncate max-w-[180px]">{email}</span>
-          <Link href="/account" className="text-xs text-white/80 hover:underline">Password</Link>
-          <button onClick={signOut} className="text-xs px-2.5 py-1 rounded-md border border-white/30 hover:bg-white/10">Sign out</button>
-        </div>
+        {/* Phone: tabs get their own full-width row so they never get squeezed out. */}
+        <nav className="sm:hidden flex gap-1 pb-2 -mt-1">
+          {links.map((l) => (
+            <Link key={l.href} href={l.href}
+              className={`flex-1 text-center px-2 py-2 text-sm rounded-md whitespace-nowrap ${isActive(l.href) ? 'bg-white/15 font-semibold' : 'bg-white/5 text-white/80'}`}>
+              {l.label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </header>
   );

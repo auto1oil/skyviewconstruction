@@ -116,7 +116,34 @@ export default function EmployeesPage() {
       {loading ? (
         <p className="text-xs text-gray-500">Loading…</p>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <>
+        {/* Phone: one card per person. */}
+        <div className="sm:hidden space-y-2">
+          {people.map((p) => (
+            <div key={p.id} className="bg-white border border-gray-200 rounded-lg px-3 py-2.5">
+              <div className="font-medium text-sm">{p.full_name || <span className="text-gray-400">No name</span>}</div>
+              <div className="text-xs text-gray-500 break-all">{p.email}</div>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                {p.role === 'master_admin' ? (
+                  <span className="text-xs">Master admin</span>
+                ) : (
+                  <select value={p.role} onChange={(e) => changeRole(p, e.target.value as 'employee' | 'admin')}
+                    className="border border-gray-300 rounded-md px-2 py-1 text-xs bg-white">
+                    <option value="employee">Employee</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                )}
+                <label className="text-xs text-gray-600 flex items-center gap-1.5 whitespace-nowrap" title="Skip the geofence — may clock in from anywhere">
+                  <input type="checkbox" checked={!!p.remote_clock} onChange={(e) => toggleRemote(p, e.target.checked)} />
+                  remote
+                </label>
+              </div>
+            </div>
+          ))}
+          {people.length === 0 && <p className="px-3 py-6 text-center text-xs text-gray-400">No logins yet.</p>}
+        </div>
+        {/* Wider screens: a table. */}
+        <div className="hidden sm:block bg-white border border-gray-200 rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
               <tr>
@@ -153,6 +180,7 @@ export default function EmployeesPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
       <p className="text-[11px] text-gray-400 mt-3">
         To remove someone or reset a password, use the Supabase dashboard (Authentication → Users). Deleting a user also deletes their hours history.

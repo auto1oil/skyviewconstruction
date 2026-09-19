@@ -529,13 +529,13 @@ export default function AdminHoursPage() {
 
   return (
     <div>
-      <div className="overflow-x-auto mb-3 -mx-4 px-4">
-        <div className="flex items-center gap-2 min-w-max">
-          <h1 className="text-lg font-semibold whitespace-nowrap mr-2">Time clock</h1>
+      <div className="mb-3 flex flex-col sm:flex-row sm:items-center gap-2">
+        <h1 className="text-lg font-semibold whitespace-nowrap sm:mr-2">Time clock</h1>
+        <div className="flex items-center gap-2 min-w-0">
           <select
             value={selectedWeek}
             onChange={(e) => setSelectedWeek(e.target.value)}
-            className="px-2 py-1.5 text-xs border border-gray-300 rounded-md bg-white"
+            className="flex-1 min-w-0 px-2 py-1.5 text-xs border border-gray-300 rounded-md bg-white"
           >
             {weekOptions.map((k) => (
               <option key={k} value={k}>
@@ -545,23 +545,26 @@ export default function AdminHoursPage() {
           </select>
           <button
             onClick={exportCSV}
-            className="px-2 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap"
+            className="shrink-0 px-2 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50 whitespace-nowrap"
           >
             Export CSV
           </button>
         </div>
       </div>
 
-      <p className="text-xs text-gray-500 mb-4">
-        Tap an employee&apos;s pill to clock them in; it turns into <span className="font-medium">Clock out</span> while
-        they&apos;re on the clock, and the session rolls into their hours below. The pay week runs Sunday to Saturday.
-      </p>
-      <p className="text-[11px] text-gray-400 mb-4">
-        📍 While someone is clocked in <em>and</em> has the app open, their phone reports its location. Tap{' '}
-        <span className="text-brand-700">📍</span> next to a clocked-in person to see where they are now, or{' '}
-        <span className="font-medium">Edit</span> a past week to view each session&apos;s trail. Location isn&apos;t
-        recorded off the clock, and the trail has gaps whenever the app was closed.
-      </p>
+      <details className="mb-4 text-xs text-gray-500">
+        <summary className="cursor-pointer text-brand-700 select-none">How this board works</summary>
+        <p className="mt-2">
+          Tap an employee&apos;s pill to clock them in; it turns into <span className="font-medium">Clock out</span> while
+          they&apos;re on the clock, and the session rolls into their hours below. The pay week runs Sunday to Saturday.
+        </p>
+        <p className="mt-2 text-[11px] text-gray-400">
+          📍 While someone is clocked in <em>and</em> has the app open, their phone reports its location. Tap{' '}
+          <span className="text-brand-700">📍</span> next to a clocked-in person to see where they are now, or{' '}
+          <span className="font-medium">Edit</span> a past week to view each session&apos;s trail. Location isn&apos;t
+          recorded off the clock, and the trail has gaps whenever the app was closed.
+        </p>
+      </details>
 
       <SelfClock />
 
@@ -677,11 +680,11 @@ export default function AdminHoursPage() {
                     <tbody>
                       {personEntries.map((e) => (
                         <tr key={e.id} className="border-b border-gray-100 last:border-b-0">
-                          <td className="px-3 py-2 text-gray-600 whitespace-nowrap w-24 align-top">
+                          <td className="px-3 py-2 text-gray-600 whitespace-nowrap w-20 sm:w-24 align-top">
                             {dayLabel(e.date)}
                           </td>
                           <td className="px-3 py-2 align-top">
-                            <div className="font-medium tabular-nums">{Number(e.hours).toFixed(2)} hrs</div>
+                            <div className="font-medium tabular-nums whitespace-nowrap">{Number(e.hours).toFixed(2)} hrs</div>
                             {e.is_clock && e.clock_sessions && e.clock_sessions.length > 0 && (
                               <div className="mt-0.5 space-y-0.5">
                                 {e.clock_sessions.map((s, i) => {

@@ -129,17 +129,19 @@ export default function WorkSitesManager() {
 
               {editId === s.id && (
                 <div className="rounded-md bg-gray-50 border border-gray-200 p-2 space-y-2">
-                  <div className="flex gap-2 flex-wrap items-end">
-                    <button type="button" onClick={() => setEShowMap((v) => !v)} className="px-2.5 py-1 text-xs rounded-md bg-brand-700 text-white hover:bg-brand-900 font-medium">
+                  <div className="flex gap-2 flex-wrap">
+                    <button type="button" onClick={() => setEShowMap((v) => !v)} className="px-2.5 py-1 text-xs rounded-md bg-brand-700 text-white hover:bg-brand-900 font-medium whitespace-nowrap">
                       🗺️ {eShowMap ? 'Hide map' : 'Pick on map'}
                     </button>
-                    <button type="button" onClick={useMyLocationEdit} disabled={eLocBusy} className="px-2.5 py-1 text-xs rounded-md border border-brand-700 text-brand-700 hover:bg-brand-50 disabled:opacity-50">
+                    <button type="button" onClick={useMyLocationEdit} disabled={eLocBusy} className="px-2.5 py-1 text-xs rounded-md border border-brand-700 text-brand-700 hover:bg-brand-50 disabled:opacity-50 whitespace-nowrap">
                       {eLocBusy ? 'Locating…' : '📍 Use current location'}
                     </button>
-                    <label className="text-xs text-gray-500 flex flex-col">Lat
-                      <input value={eLat} onChange={(e) => setELat(e.target.value)} className="w-28 border rounded px-1 py-0.5 text-xs" /></label>
-                    <label className="text-xs text-gray-500 flex flex-col">Lng
-                      <input value={eLng} onChange={(e) => setELng(e.target.value)} className="w-28 border rounded px-1 py-0.5 text-xs" /></label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 max-w-xs">
+                    <label className="text-xs text-gray-500 flex flex-col min-w-0">Lat
+                      <input value={eLat} onChange={(e) => setELat(e.target.value)} inputMode="decimal" className="w-full border rounded px-1 py-0.5 text-xs" /></label>
+                    <label className="text-xs text-gray-500 flex flex-col min-w-0">Lng
+                      <input value={eLng} onChange={(e) => setELng(e.target.value)} inputMode="decimal" className="w-full border rounded px-1 py-0.5 text-xs" /></label>
                   </div>
                   {eShowMap && (
                     <SitePinPicker
@@ -163,20 +165,22 @@ export default function WorkSitesManager() {
           ))}
           <div className="pt-1 space-y-2">
             <div className="text-xs font-semibold text-gray-600">Add a site</div>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Site name (e.g. Main yard, Smith residence)" className="w-full border rounded px-2 py-1.5 text-sm" />
-            <div className="flex gap-2 flex-wrap items-end">
-              <button type="button" onClick={() => setShowMap((v) => !v)} className="px-3 py-1.5 text-sm rounded-md bg-brand-700 text-white hover:bg-brand-900 font-medium">
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Site name (e.g. Main yard)" className="w-full border rounded px-2 py-1.5 text-sm" />
+            <div className="flex gap-2 flex-wrap">
+              <button type="button" onClick={() => setShowMap((v) => !v)} className="px-3 py-1.5 text-sm rounded-md bg-brand-700 text-white hover:bg-brand-900 font-medium whitespace-nowrap">
                 🗺️ {showMap ? 'Hide map' : 'Pick on map'}
               </button>
-              <button type="button" onClick={useMyLocation} disabled={locBusy} className="px-3 py-1.5 text-sm rounded-md border border-brand-700 text-brand-700 hover:bg-brand-50 disabled:opacity-50">
+              <button type="button" onClick={useMyLocation} disabled={locBusy} className="px-3 py-1.5 text-sm rounded-md border border-brand-700 text-brand-700 hover:bg-brand-50 disabled:opacity-50 whitespace-nowrap">
                 {locBusy ? 'Locating…' : '📍 Use current location'}
               </button>
-              <label className="text-xs text-gray-500 flex flex-col">Lat
-                <input value={lat} onChange={(e) => setLat(e.target.value)} className="w-28 border rounded px-1 py-0.5 text-xs" /></label>
-              <label className="text-xs text-gray-500 flex flex-col">Lng
-                <input value={lng} onChange={(e) => setLng(e.target.value)} className="w-28 border rounded px-1 py-0.5 text-xs" /></label>
-              <label className="text-xs text-gray-500 flex flex-col">Radius (m)
-                <input value={radius} onChange={(e) => setRadius(e.target.value)} className="w-20 border rounded px-1 py-0.5 text-xs" /></label>
+            </div>
+            <div className="grid grid-cols-3 gap-2 max-w-sm">
+              <label className="text-xs text-gray-500 flex flex-col min-w-0">Lat
+                <input value={lat} onChange={(e) => setLat(e.target.value)} inputMode="decimal" className="w-full border rounded px-1 py-0.5 text-xs" /></label>
+              <label className="text-xs text-gray-500 flex flex-col min-w-0">Lng
+                <input value={lng} onChange={(e) => setLng(e.target.value)} inputMode="decimal" className="w-full border rounded px-1 py-0.5 text-xs" /></label>
+              <label className="text-xs text-gray-500 flex flex-col min-w-0">Radius (m)
+                <input value={radius} onChange={(e) => setRadius(e.target.value)} inputMode="numeric" className="w-full border rounded px-1 py-0.5 text-xs" /></label>
             </div>
             {showMap && (
               <SitePinPicker
